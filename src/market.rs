@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 pub type OrderId = u64;
 
 pub enum Signal {
@@ -6,11 +8,21 @@ pub enum Signal {
     Hold,
 }
 
+pub struct Symbol(pub String);
+
+impl Deref for Symbol {
+    type Target = String;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 pub struct Order {
     pub id: OrderId,
     pub quantity: f64,
     pub price: f64,
-    pub symbol: String,
+    pub symbol: Symbol,
 }
 
 struct Candle {
@@ -24,7 +36,8 @@ struct Candle {
 
 pub trait Market {
     fn get_price(&self, symbol: &str) -> f64;
-    fn place_order(&self, order: Order) -> anyhow::Result<OrderId>;
+    fn place_buy_order(&self, order: Order) -> anyhow::Result<OrderId>;
+    fn place_sell_order(&self, order: Order) -> anyhow::Result<OrderId>;
     fn cancel_order(&self, id: OrderId) -> anyhow::Result<()>;
     fn get_balance(&self) -> anyhow::Result<f64>;
 }
@@ -42,7 +55,11 @@ impl Market for MockMarket {
         100.0
     }
 
-    fn place_order(&self, _order: Order) -> anyhow::Result<OrderId> {
+    fn place_buy_order(&self, _order: Order) -> anyhow::Result<OrderId> {
+        Ok(1)
+    }
+
+    fn place_sell_order(&self, _order: Order) -> anyhow::Result<OrderId> {
         Ok(1)
     }
 
